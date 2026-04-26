@@ -1,0 +1,69 @@
+{
+    "name": "@andreas-timm/cli",
+    "version": "0.1.3",
+    "description": "CAC helpers for Bun and TypeScript CLIs",
+    "license": "BSD-2-Clause",
+    "author": {
+        "name": "Andreas Timm",
+        "email": "info@andreas-timm.dev"
+    },
+    "homepage": "https://github.com/andreas-timm/cli-ts#readme",
+    "bugs": {
+        "url": "https://github.com/andreas-timm/cli-ts/issues"
+    },
+    "keywords": [
+        "bun",
+        "cac",
+        "cli",
+        "completion",
+        "typescript"
+    ],
+    "type": "module",
+    "files": [
+        "dist",
+        "src",
+        "skills",
+        "CHANGELOG.md",
+        "LICENSE",
+        "README.md"
+    ],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/andreas-timm/cli-ts.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "rm -rf dist && bun build src/index.ts --target node --format esm --packages external --outfile dist/index.js && tsc -p tsconfig.build.json",
+        "lint": "set -x; status=0; biome lint || status=$?; biome check || status=$?; eslint scripts src test || status=$?; tsc --noEmit -p tsconfig.json || status=$?; exit $status",
+        "test": "bun test test",
+        "pack": "bun pm pack --ignore-scripts --destination packs",
+        "prepack": "bun run build",
+        "prepublishOnly": "bun run lint && bun test && npm audit --audit-level=moderate",
+        "postpack": "bun scripts/postpack.ts",
+        "release:publish": "bun scripts/publish.ts"
+    },
+    "dependencies": {
+        "cac": "^7.0.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.4.13",
+        "@eslint/js": "^10.0.1",
+        "@types/bun": "^1.3.13",
+        "@types/node": "^25.6.0",
+        "@typescript-eslint/eslint-plugin": "^8.59.1",
+        "@typescript-eslint/parser": "^8.59.1",
+        "globals": "^17.5.0",
+        "prettier-plugin-organize-imports": "^4.3.0",
+        "typescript": "^5.9.3"
+    }
+}
