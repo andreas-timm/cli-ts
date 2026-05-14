@@ -11,8 +11,8 @@ export function registerTestCommands(cli: CAC): void {
             config: { choices: ["dev", "ci"] },
         },
     ]);
-    defaultCommand.action(async () => {
-        console.log("Ran default workflow");
+    defaultCommand.action(async (args) => {
+        console.log("Ran default workflow", args);
     });
 
     registerCommands(
@@ -25,6 +25,7 @@ export function registerTestCommands(cli: CAC): void {
             });
         },
     );
+
     registerCommands(
         cli,
         ["project tasks sync"],
