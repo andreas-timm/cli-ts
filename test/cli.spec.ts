@@ -255,6 +255,19 @@ describe("run", () => {
         expect(executed).toBeTrue();
     });
 
+    it("passes args after -- to matched command positionals", async () => {
+        const cli = cac("tool");
+        let value: string | undefined;
+
+        cli.command("test <value>").action((received: string) => {
+            value = received;
+        });
+
+        await run(cli, ["bun", "tool", "test", "--", "-aaa"]);
+
+        expect(value).toBe("-aaa");
+    });
+
     it("handles errors gracefully without debug flag", async () => {
         const cli = cac("tool");
         cli.command("fail").action(() => {

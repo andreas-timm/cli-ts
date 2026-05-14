@@ -17,6 +17,17 @@ export function registerTestCommands(cli: CAC): void {
 
     registerCommands(
         cli,
+        ["test <value>"],
+        "Test a string value",
+        (command) => {
+            command.action(async (value: string) => {
+                console.log("Tested value", value);
+            });
+        },
+    );
+
+    registerCommands(
+        cli,
         ["project tasks list"],
         "List project tasks",
         (command) => {
