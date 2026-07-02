@@ -44,6 +44,8 @@ await run(cli);
 
 For the full CLI patterns, option rules, completion behavior, and install-command guidance, see [`skills/bun-cli/SKILL.md`](./skills/bun-cli/SKILL.md).
 
+Releases are automated with semantic-release; see the [Releasing section in `CONTRIBUTING.md`](./CONTRIBUTING.md#releasing).
+
 ## Agent skill `bun-cli`
 
 The package ships a Cursor/Agent skill named **bun-cli** so assistants can follow consistent patterns for `cac`, command registration, help, completion, and related CLI work.

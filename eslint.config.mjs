@@ -35,4 +35,14 @@ export default [
             sourceType: "module",
         },
     },
+    {
+        files: ["scripts/**/*.cjs"],
+        languageOptions: {
+            ecmaVersion: "latest",
+            sourceType: "commonjs",
+            globals: {
+                ...globals.node,
+            },
+        },
+    },
 ];
