@@ -28,6 +28,13 @@ type CacWithInternals = CAC & {
     runMatchedCommand?: () => unknown;
 };
 
+type ParsedCliArgs = {
+    args?: string[];
+    options?: {
+        "--"?: string[];
+    };
+};
+
 let isBrokenPipeHandlerInstalled = false;
 
 function isBrokenPipeError(error: unknown): boolean {
@@ -53,6 +60,17 @@ function installBrokenPipeHandler(): void {
         throw error;
     });
     isBrokenPipeHandlerInstalled = true;
+}
+
+function appendDoubleDashArgs(cli: CAC): string[] {
+    const parsedCli = cli as unknown as ParsedCliArgs;
+    const argsAfterDoubleDash = parsedCli.options?.["--"] ?? [];
+    if (argsAfterDoubleDash.length === 0) {
+        return parsedCli.args ?? [];
+    }
+
+    parsedCli.args = [...(parsedCli.args ?? []), ...argsAfterDoubleDash];
+    return parsedCli.args;
 }
 
 export async function run(
@@ -85,7 +103,7 @@ export async function run(
 
         const matchedCommand = (cli as { matchedCommand?: ParsedCommand })
             .matchedCommand;
-        const parsedArgs = (cli as unknown as { args?: string[] }).args ?? [];
+        const parsedArgs = appendDoubleDashArgs(cli);
 
         if (!matchedCommand && parsedArgs.length > 0) {
             if (findPrefixSubcommands(cli, parsedArgs).length > 0) {

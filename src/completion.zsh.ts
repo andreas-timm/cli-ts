@@ -753,14 +753,36 @@ export function generateZshCompletion(cli: CAC): string {
     return lines.join("\n");
 }
 
+type ZshCompletionCommandOptions = {
+    name?: string;
+};
+
+function generateZshCompletionWithName(cli: CAC, name: string | undefined) {
+    if (name === undefined) {
+        return generateZshCompletion(cli);
+    }
+
+    const previousName = cli.name;
+    cli.name = name;
+
+    try {
+        return generateZshCompletion(cli);
+    } finally {
+        cli.name = previousName;
+    }
+}
+
 export function registerCompletionCommands(cli: CAC): void {
     registerCommands(
         cli,
         ["completion zsh"],
         "Print a zsh completion script",
         (command) => {
-            command.action(() => {
-                process.stdout.write(generateZshCompletion(cli));
+            command.option("--name <bin>", "Override the completion bin name");
+            command.action((options: ZshCompletionCommandOptions) => {
+                process.stdout.write(
+                    generateZshCompletionWithName(cli, options.name),
+                );
             });
         },
     );

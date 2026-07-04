@@ -76,6 +76,38 @@ async function captureConsoleOutputAsync(
     return lines.join("\n");
 }
 
+async function captureStdoutWriteAsync(
+    runWithCapture: () => Promise<void>,
+): Promise<string> {
+    const originalWrite = process.stdout.write;
+    const chunks: string[] = [];
+
+    (process.stdout as any).write = (chunk: unknown, ...args: unknown[]) => {
+        if (typeof chunk === "string") {
+            chunks.push(chunk);
+        } else if (chunk instanceof Uint8Array) {
+            chunks.push(new TextDecoder().decode(chunk));
+        } else {
+            chunks.push(String(chunk));
+        }
+
+        const callback = args.find(
+            (arg): arg is (error?: Error | null) => void =>
+                typeof arg === "function",
+        );
+        callback?.();
+        return true;
+    };
+
+    try {
+        await runWithCapture();
+    } finally {
+        process.stdout.write = originalWrite;
+    }
+
+    return chunks.join("");
+}
+
 const originalProcessExit = process.exit;
 function mockProcessExit() {
     (process as any).exit = (code?: number) => {
@@ -221,6 +253,19 @@ describe("run", () => {
         await run(cli, ["bun", "tool"]);
 
         expect(executed).toBeTrue();
+    });
+
+    it("passes args after -- to matched command positionals", async () => {
+        const cli = cac("tool");
+        let value: string | undefined;
+
+        cli.command("test <value>").action((received: string) => {
+            value = received;
+        });
+
+        await run(cli, ["bun", "tool", "test", "--", "-aaa"]);
+
+        expect(value).toBe("-aaa");
     });
 
     it("handles errors gracefully without debug flag", async () => {
@@ -588,6 +633,27 @@ describe("generateZshCompletion", () => {
         expect(completion).not.toContain(
             "options=('--help' '--manifest' '--port'",
         );
+    });
+});
+
+describe("registerCompletionCommands", () => {
+    it("uses --name as cli.name while printing zsh completion", async () => {
+        const cli = createTestCli();
+
+        const completion = await captureStdoutWriteAsync(async () => {
+            await run(cli, [
+                "bun",
+                "bun-package-cli",
+                "completion",
+                "zsh",
+                "--name",
+                "custom-bin",
+            ]);
+        });
+
+        expect(completion).toContain("#compdef custom-bin");
+        expect(completion).toContain("'--name'");
+        expect(cli.name).toBe("bun-package-cli");
     });
 });
 
